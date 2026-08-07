@@ -7,7 +7,7 @@ from esgcet.kerchunk.mapfile_model import MapFileRecord, MapFileCatalog
 from typing import Annotated, Literal
 
 from pathlib import Path
-from esgcet.settings import QAQC
+from esgcet.settings import QAQC, PROJECT_MAP
 
 app = typer.Typer(help=__doc__)
 
@@ -67,7 +67,11 @@ def cc(
 
     check_suite = CheckSuite()
     check_suite.load_all_available_checkers()
-    project_qc_config = QAQC.get(project.lower(), None)
+    # translate user-facing alias (cmip7) to internal QAQC key (mip-drs7)
+    internal_project = PROJECT_MAP.get(project.lower(), project.lower())
+    project_qc_config = QAQC.get(internal_project, None)
+    if project_qc_config is None:
+        raise ValueError(f"No QAQC config found for project '{project}'")
 
     for map_file in map_files:
         if map_file.is_file():
