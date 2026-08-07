@@ -112,17 +112,23 @@ class MapFileRecord(BaseModel):
         """
 
         validator = DrsValidator(project_id=self.project.lower())
-        # esgvoc provides dataset id validation against vocabularies
+        # esgvoc wants the version back in the dataset_id (directory_date facet)
+        if "CMIP6" in self.project:
+            dataset_id_expr = f"{self.dataset_id}#{self.version}"
+        else:
+            dataset_id_expr = f"{self.dataset_id}.v{self.version}"
 
-        if not validator.validate_dataset_id(drs_expression=self.dataset_id).validated:
-            raise ValueError(f"Invalid {self.project} dataset_id: {self.dataset_id}")
+        if not validator.validate_dataset_id(drs_expression=dataset_id_expr).validated:
+            raise ValueError(f"Invalid {self.project} dataset_id: {dataset_id_expr}")
 
 
         v_path = Path(self.file_path)
         parts = v_path.parts
         try:
             cmip_index = parts.index(self.project)
-            result = "/".join(parts[cmip_index:-1])  # Includes everything after CMIP6/7/plus
+            # esgvoc expects the drs_specs facet (e.g. MIP-DRS7), one level up
+            start_index = max(cmip_index - 1, 0)
+            result = "/".join(parts[start_index:-1])
         except ValueError:
             print(f"{self.project} not found in path")
 
