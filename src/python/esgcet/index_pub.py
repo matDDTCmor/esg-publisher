@@ -74,6 +74,21 @@ class ESGPubIndex:
                     self.arch_cfg = None
                     rc = False
             self.publog.debug(new_xml)
+
+            if self._dry_run:
+                self.publog.info(f"dry run on, not publishing {rec.get('id', rec.get('dataset_id', ''))}")
+                continue
+
+            if not hasattr(self, "pubCli"):
+                self.publog.error(
+                    "No index_node configured for legacy Solr publishing "
+                    "(pubCli was never constructed). Set 'index_node' in the "
+                    "config, or use stac_config/stac_api to publish via STAC "
+                    "instead."
+                )
+                rc = False
+                continue
+
             self.pubCli.publish(new_xml)
 
         return rc
