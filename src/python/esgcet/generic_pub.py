@@ -85,6 +85,11 @@ class BasePublisher(object):
 
     def update(self, json_data):
 
+        if self.dry_run:
+            rec_id = json_data[0].get("master_id", json_data[0].get("id", ""))
+            self.publog.info(f"dry run on, not checking/updating index for {rec_id}")
+            return
+
         stac_conf = self.argdict.get("stac_config", {})
         if stac_conf:
             up = ESGUpdateSTAC(self.argdict)
