@@ -22,6 +22,47 @@ def check_files(files):
             publog.exception("Error opening file " + file + ". Exiting.")
             exit(1)
 
+
+def read_exclude_vars_file(path):
+    # one variable_id per line, '#' comments and blank lines ignored
+    with open(path, "r") as fh:
+        lines = [l.split("#", 1)[0].strip() for l in fh]
+    return {l for l in lines if l}
+
+
+def get_exclude_vars(pub, pub_args):
+    # merges --exclude-variable, --exclude-variables-file, and config yaml equivalents
+    exclude_vars = set(getattr(pub, "exclude_variable", None) or [])
+    if getattr(pub, "exclude_variables_file", None):
+        exclude_vars |= read_exclude_vars_file(pub.exclude_variables_file)
+    try:
+        cfg = pub_args.load_config(pub.cfg)
+        exclude_vars |= set(cfg.get("exclude_variables", None) or [])
+        if cfg.get("exclude_variables_file"):
+            exclude_vars |= read_exclude_vars_file(cfg["exclude_variables_file"])
+    except Exception:
+        pass
+    return exclude_vars
+
+
+def dataset_id_from_mapfile(path):
+    # first ' | '-delimited field of the first line; None on any problem (fail open)
+    try:
+        with open(path, "r") as fh:
+            first_line = fh.readline()
+        if not first_line or " | " not in first_line:
+            return None
+        return first_line.split(" | ")[0].strip()
+    except Exception:
+        return None
+
+
+def is_excluded(dataset_id, exclude_vars):
+    # exact dot-delimited DRS facet match, not substring
+    if not dataset_id or not exclude_vars:
+        return False
+    return bool(exclude_vars.intersection(dataset_id.split(".")))
+
 class PubRunner:
 
     def __init__(self, publog):
@@ -104,6 +145,16 @@ def main():
 
     rc = True
     prunner = PubRunner(publog)
+    exclude_vars = get_exclude_vars(pub, pub_args)
+    if exclude_vars:
+        publog.info("Excluding variable_id(s) from this run: " + ", ".join(sorted(exclude_vars)))
+
+    def run_unless_excluded(mapfile_path):
+        ds_id = dataset_id_from_mapfile(mapfile_path)
+        if is_excluded(ds_id, exclude_vars):
+            publog.info("Skipping excluded mapfile (dataset_id=" + str(ds_id) + "): " + mapfile_path)
+            return True
+        return prunner.run(mapfile_path, pub_args)
 
     for m in maps:
         if os.path.isdir(m):
@@ -113,7 +164,7 @@ def main():
                 fullmappath = mappath / f
                 if os.path.isdir(fullmappath):
                     continue  # Do not recurse subdirectories
-                rc = rc and prunner.run(str(fullmappath), pub_args)
+                rc = rc and run_unless_excluded(str(fullmappath))
         else:
             myfile = open(m)
             ismap = False
@@ -125,10 +176,10 @@ def main():
                         ismap = True
                         break
                     first = False
-                rc = rc and prunner.run(line.rstrip(), pub_args)
+                rc = rc and run_unless_excluded(line.rstrip())
             myfile.close()
             if ismap:
-                rc = rc and prunner.run(m, pub_args)
+                rc = rc and run_unless_excluded(m)
 
     if not rc:
         exit(1)

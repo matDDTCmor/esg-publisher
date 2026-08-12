@@ -47,6 +47,8 @@ class PublisherArgs:
         parser.add_argument("--no-xarray", dest="skipxr", action="store_true", help="Bypass use of Xarray (metadata will be incomplete)")
         parser.add_argument("--dry-run", dest="dry_run", action="store_true", help="Dry run publishing. Scans data but does not interface with index APIs.")
         parser.add_argument("--save-stac", action="store_true", help="For use with STAC publishing: saves the STAC Item to the cwd named as <dataset-id>.json.  Useful to validate an Item in event of an error.")
+        parser.add_argument("--exclude-variable", dest="exclude_variable", action="append", default=[], help="Skip mapfiles whose dataset_id has this variable_id as a DRS facet (repeatable). Also settable via 'exclude_variables' in config yaml.")
+        parser.add_argument("--exclude-variables-file", dest="exclude_variables_file", default=None, help="Path to a text file listing variable_ids to exclude, one per line ('#' comments/blank lines ignored). Also settable via 'exclude_variables_file' in config yaml.")
         pub = parser.parse_args()
 
         return pub
