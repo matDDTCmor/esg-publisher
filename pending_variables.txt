@@ -22,6 +22,18 @@ sndmassmelt    # SImon.sndmassmelt -> sndmassmelt_tavg-u-hxy-si: not in pinned C
 sndmasssnf     # SImon.sndmasssnf -> sndmasssnf_tavg-u-hxy-si: not in pinned CMOR tables
 sndmasssubl    # SImon.sndmasssubl -> sndmasssubl_tavg-u-hxy-si: not in pinned CMOR tables
 
+cTotFireLut        # Emon.cTotFireLut -> cTotFireLut_tavg-u-hxy-lnd: axis
+                   # 'typenat' not defined in CMIP7_coordinate.json (land-use
+                   # type axis missing upstream); handoff-2026-08-13
+fProductDecompLut  # Emon.fProductDecompLut -> same typenat gap
+necbLut            # Emon.necbLut -> same typenat gap
+nwdFracLut         # Emon.nwdFracLut -> same typenat gap
+mrroLut            # LPJGmon.mrroLut + Emon.mrroLut -> same typenat gap
+                   # (two cmip6 sources, one identical broken cmip7 target,
+                   # no out_name collision)
+mrsoLut            # LPJGmon.mrsoLut + Emon.mrsoLut -> same typenat gap
+mrsosLut           # LPJGmon.mrsosLut -> same typenat gap
+
 # NOT excluded (deliberately): po4os
 # Omon.po4os -> po4_tavg-ols-hxy-sea (surface PO4) is missing from the tables,
 # but its out_name "po4" is shared with Omon.po4 -> po4_tavg-ol-hxy-sea
