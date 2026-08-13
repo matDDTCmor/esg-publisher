@@ -65,7 +65,9 @@ class GenericPublisher(BasePublisher):
             self.publog.warning(f"QAQC not configured for {self.project}")
             return True
 
-        ccreport_file = Path(self.fullmap).with_suffix(".ccreport").name
+        ccreport_dir = Path(self.fullmap).parent / "ccreports"
+        ccreport_dir.mkdir(parents=True, exist_ok=True)
+        ccreport_file = str(ccreport_dir / Path(self.fullmap).with_suffix(".ccreport").name)
         return_value, errors = ComplianceChecker.run_checker(
             {mapfile_record['file'] for mapfile_record in self.mapdict},
             project_qc_config['test'],

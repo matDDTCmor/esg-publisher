@@ -77,7 +77,9 @@ def cc(
         if map_file.is_file():
             try:
                 mf_cat = MapFileCatalog.from_mapfile(map_file)
-                ccreport_file = Path(map_file).with_suffix(".ccreport").name
+                ccreport_dir = Path(map_file).parent / "ccreports"
+                ccreport_dir.mkdir(parents=True, exist_ok=True)
+                ccreport_file = str(ccreport_dir / Path(map_file).with_suffix(".ccreport").name)
 
                 return_value, errors = ComplianceChecker.run_checker(
                     mf_cat.ncfiles,
