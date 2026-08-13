@@ -1,0 +1,32 @@
+# pending_variables.txt
+# Variables excluded from --exclude-variables-file until upstream WCRP-CMIP
+# cmip7-cmor-tables defines their CMIP7 branded target. Matches on the
+# CMIP7 output variable_id (out_name), one per line, '#' comments ignored.
+#
+# Each entry: out_name  # cmip6_compound_name -> branded_variable_name (why)
+
+cSoilLut       # Emon.cSoilLut -> TIME001: year-end vs year-start stamping,
+               # blocked on WCRP CMIP7 policy decision (gitlab-issue-2096)
+
+expfe          # Emon.expfe -> expfe_tavg-d100m-hxy-sea: not in pinned CMOR tables
+fgo2           # Omon.fgo2 -> fgo2_tavg-u-hxy-sea: not in pinned CMOR tables
+hcont300       # Omon.hcont300 -> hcont300_tavg-olayer300m-hxy-sea: not in pinned CMOR tables
+mlddzt         # Omon.mlddzt -> mlddzt_tavg-u-hxy-sea: not in pinned CMOR tables
+ubar           # Omon.ubar -> ubar_tavg-u-hxy-sea: not in pinned CMOR tables
+vbar           # Omon.vbar -> vbar_tavg-u-hxy-sea: not in pinned CMOR tables
+wfonocorr      # Omon.wfonocorr -> wfonocorr_tavg-u-hxy-sea: not in pinned CMOR tables
+zo2min         # Omon.zo2min -> zo2min_tmin-u-hxy-sea: not in pinned CMOR tables
+sishevel       # SIday.sishevel + SImon.sishevel -> sishevel_tpt-u-hxy-si: not in pinned CMOR tables
+sidmasssi      # SImon.sidmasssi -> sidmasssi_tavg-u-hxy-si: not in pinned CMOR tables
+sndmassmelt    # SImon.sndmassmelt -> sndmassmelt_tavg-u-hxy-si: not in pinned CMOR tables
+sndmasssnf     # SImon.sndmasssnf -> sndmasssnf_tavg-u-hxy-si: not in pinned CMOR tables
+sndmasssubl    # SImon.sndmasssubl -> sndmasssubl_tavg-u-hxy-si: not in pinned CMOR tables
+
+# NOT excluded (deliberately): po4os
+# Omon.po4os -> po4_tavg-ols-hxy-sea (surface PO4) is missing from the tables,
+# but its out_name "po4" is shared with Omon.po4 -> po4_tavg-ol-hxy-sea
+# (full profile), which DOES exist and publishes fine. --exclude-variables-file
+# matches on out_name only, so excluding "po4os" here would also exclude the
+# working profile variable. Left in until the exclude mechanism supports
+# matching by branded_variable_name, or a deliberate call is made to accept
+# blocking po4 entirely in the meantime.
