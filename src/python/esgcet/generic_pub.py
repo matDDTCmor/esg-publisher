@@ -126,6 +126,13 @@ class BasePublisher(object):
 
         # TODO: support solr and Globus using the globus_index argument
 
+        if self.argdict.get("save_stac") and not (self.argdict.get("stac_config") or self.argdict.get("stac_api")):
+            self.publog.warning(
+                "--save-stac has no effect: no stac_config/stac_api configured, "
+                "so this run will use the Solr/Globus index path, which doesn't "
+                "write STAC items. Add a stac_config block to publish/save via STAC."
+            )
+
         if self.argdict.get("stac_config") or self.argdict.get("stac_api"):
             TransactionClient = getTransactionClient(
                 self.argdict.get("stac_config", {})
