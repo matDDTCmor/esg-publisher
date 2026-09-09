@@ -133,6 +133,16 @@ class PubRunner:
         return self.proj.workflow()
 
 
+def get_log_file(pub_args, pub):
+    # config-yaml-only (no CLI flag, same reasoning as disable_qaqc in
+    # args.py): mirrors get_exclude_vars()'s defensive load pattern.
+    try:
+        cfg = pub_args.load_config(pub.cfg)
+        return cfg.get("log_file", None)
+    except Exception:
+        return None
+
+
 def main():
     pub_args = PublisherArgs()
     pub = pub_args.get_args()
@@ -142,6 +152,11 @@ def main():
             "Missing argument --map, use " + sys.argv[0] + " --help for usage."
         )
         exit(1)
+
+    log_file = get_log_file(pub_args, pub)
+    if log_file:
+        logger.add_file_handler(log_file)
+        publog.info(f"Logging to file: {log_file}")
 
     rc = True
     prunner = PubRunner(publog)

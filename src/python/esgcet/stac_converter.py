@@ -1,6 +1,7 @@
 import re
 from datetime import datetime, timezone
 
+import esgcet.logger as logger
 from esgcet.settings import (
     MAP_properties,
     STAC_item_properties,
@@ -9,6 +10,9 @@ from esgcet.settings import (
     STAC_schema_versions,
 )
 from esgvoc.apps.jsg import json_schema_generator as jsg
+
+log = logger.ESGPubLogger()
+publog = log.return_logger("STAC Converter")
 
 
 class ESGSTACItem:
@@ -109,6 +113,7 @@ class ESGSTACItem:
 class ESGSTACConverter:
     def __init__(self, stac_config):
         self.stac_api = stac_config.get("stac_api", "")
+        self.publog = publog
 
     def citation_link_d(self, url):
 
@@ -331,5 +336,5 @@ class ESGSTACConverter:
         if "citation_url" in dataset_doc:
             item["links"].append(self.citation_link_d(dataset_doc["citation_url"]))
         else:
-            print("WARNING no Citation url")
+            self.publog.warning("no Citation url")
         return item
