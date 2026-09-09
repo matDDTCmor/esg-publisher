@@ -1,5 +1,6 @@
 import json
 import os
+from pathlib import Path
 from typing import Any
 
 import esgcet.logger as logger
@@ -58,6 +59,7 @@ class GlobusTransactionClient:
         )
         self.dry_run = args.get("dry_run")
         self.save_stac = args.get("save_stac")
+        self.local_items_dir = self.stac_config.get("local_items_dir", ".")
         self._create_clients()
 
     def _do_login_flow(self):
@@ -132,7 +134,9 @@ class GlobusTransactionClient:
         }
 
         if self.save_stac:
-            with open(f"{entry['id']}.json", "w") as f:
+            items_dir = Path(self.local_items_dir)
+            items_dir.mkdir(parents=True, exist_ok=True)
+            with open(items_dir / f"{entry['id']}.json", "w") as f:
                 f.write(json.dumps(entry, indent=1))
 
         if self.dry_run:
@@ -197,6 +201,9 @@ class EGITransactionClient:
 
         self.dry_run = args.get("dry_run")
         self.save_stac = args.get("save_stac")
+        self.local_items_dir = (args.get("stac_config") or {}).get(
+            "local_items_dir", "."
+        )
 
         stac_api_overr = args.get("stac_api", None)
         if stac_api_overr:
@@ -239,7 +246,9 @@ class EGITransactionClient:
         }
 
         if self.save_stac:
-            with open(f"{entry['id']}.json", "w") as f:
+            items_dir = Path(self.local_items_dir)
+            items_dir.mkdir(parents=True, exist_ok=True)
+            with open(items_dir / f"{entry['id']}.json", "w") as f:
                 f.write(json.dumps(entry, indent=1))
 
         if self.dry_run:
