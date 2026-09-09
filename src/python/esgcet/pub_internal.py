@@ -159,6 +159,8 @@ def main():
         publog.info(f"Logging to file: {log_file}")
 
     rc = True
+    failed = []
+    total = [0]
     prunner = PubRunner(publog)
     exclude_vars = get_exclude_vars(pub, pub_args)
     if exclude_vars:
@@ -171,15 +173,42 @@ def main():
             return True
         return prunner.run(mapfile_path, pub_args)
 
+    def run_and_record(mapfile_path):
+        # A batch run over a directory/mapfile-list must not let one bad
+        # file (a genuine QC failure, a missing .nc, a corrupt file --
+        # anything) stop the rest from being attempted. Any exception is
+        # caught and recorded rather than left to propagate and kill the
+        # whole process, and the caller never short-circuits on a prior
+        # failure (see the call sites below).
+        total[0] += 1
+        ds_id = dataset_id_from_mapfile(mapfile_path)
+        try:
+            ok = run_unless_excluded(mapfile_path)
+        except (Exception, SystemExit):
+            # Several functions in the workflow() call chain (mk_dataset,
+            # generic_pub, pid_cite_pub -- 9 call sites total) log an
+            # error and call exit(1) directly instead of raising/
+            # returning, which raises SystemExit rather than a plain
+            # Exception. A bare `except Exception` does not catch that,
+            # so it would still kill the whole batch on exactly the
+            # errors this is meant to isolate. KeyboardInterrupt is
+            # deliberately not caught here, so Ctrl-C still works.
+            publog.exception("Unhandled exception publishing " + str(mapfile_path))
+            ok = False
+        if not ok:
+            failed.append(ds_id or mapfile_path)
+        return ok
+
     for m in maps:
         if os.path.isdir(m):
             mappath = Path(m)
-            files = os.listdir(m)
+            files = sorted(os.listdir(m))
             for f in files:
                 fullmappath = mappath / f
                 if os.path.isdir(fullmappath):
                     continue  # Do not recurse subdirectories
-                rc = rc and run_unless_excluded(str(fullmappath))
+                if not run_and_record(str(fullmappath)):
+                    rc = False
         else:
             myfile = open(m)
             ismap = False
@@ -191,10 +220,17 @@ def main():
                         ismap = True
                         break
                     first = False
-                rc = rc and run_unless_excluded(line.rstrip())
+                if not run_and_record(line.rstrip()):
+                    rc = False
             myfile.close()
             if ismap:
-                rc = rc and run_unless_excluded(m)
+                if not run_and_record(m):
+                    rc = False
+
+    if failed:
+        publog.error(f"{len(failed)} of {total[0]} dataset(s) failed in this run:")
+        for ds_id in failed:
+            publog.error("  FAILED: " + str(ds_id))
 
     if not rc:
         exit(1)
