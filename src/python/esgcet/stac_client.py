@@ -195,6 +195,9 @@ class EGITransactionClient:
         silent = args.get("silent", False)
         self.publog = log.return_logger("STAC Client", silent, verbose)
 
+        self.dry_run = args.get("dry_run")
+        self.save_stac = args.get("save_stac")
+
         stac_api_overr = args.get("stac_api", None)
         if stac_api_overr:
             self.stac_api = stac_api_overr
@@ -235,6 +238,14 @@ class EGITransactionClient:
             "User-Agent": f"esgf_publisher/{__version__}",
         }
 
+        if self.save_stac:
+            with open(f"{entry['id']}.json", "w") as f:
+                f.write(json.dumps(entry, indent=1))
+
+        if self.dry_run:
+            self.publog.info("Dry-run mode: Not publishing")
+            return True
+
         try:
             response = requests.post(
                 f"{self.stac_api}/collections/{collection}/items",
@@ -272,6 +283,10 @@ class EGITransactionClient:
             "User-Agent": f"esgf_publisher/{__version__}",
             "Content-Type": "application/json-patch+json",
         }
+
+        if self.dry_run:
+            self.publog.info("Not PATCHing (dry-run mode)")
+            return
 
         try:
             response = requests.patch(
