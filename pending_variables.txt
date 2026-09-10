@@ -5,8 +5,32 @@
 #
 # Each entry: out_name  # cmip6_compound_name -> branded_variable_name (why)
 
-cSoilLut       # Emon.cSoilLut -> TIME001: year-end vs year-start stamping,
-               # blocked on WCRP CMIP7 policy decision (gitlab-issue-2096)
+cSoilLut       # Eyr.cSoilLut -> cSoilLut_tpt-u-hxy-multi: TIME001: year-end
+               # vs year-start stamping, blocked on WCRP CMIP7 policy
+               # decision (gitlab-issue-2096)
+cLitterLut     # Eyr.cLitterLut -> cLitterLut_tpt-u-hxy-multi: same TIME001 gap
+cProductLut    # Eyr.cProductLut -> cProductLut_tpt-u-hxy-multi: same TIME001 gap
+cVegLut        # Eyr.cVegLut -> cVegLut_tpt-u-hxy-multi: same TIME001 gap
+fracLut        # Emon.fracLut + Eyr.fracLut -> fracLut_tpt-u-hxy-u: same
+               # TIME001 gap. Both sources resolve to the identical branded
+               # target, so there's one real output regardless of which
+               # table produced it -- but two sources sharing one branded
+               # name is the same shape of bug fixed for Omon.so/Omon.soga
+               # this session; worth checking separately, not done here.
+
+msfty          # Omon.msftyz -> msfty_tavg-ol-ht-sea + Omon.msftyrho ->
+               # msfty_tavg-rho-ht-sea: grid_label unresolved on both
+               # sources. Existing siblings split T-grid (htovgyre/htovovrt
+               # -> g102) vs V-grid (hfy/hfyint -> g104) convention; true
+               # source of truth is file_def_nemo-{opa,lim3,pisces}.xml on
+               # git.smhi.se, not currently mirrored/accessible -- deferred
+               # to its own conversation, not guessed at.
+wmo            # Omon.wmo + Omon.wmoSouth30 -> wmo_tavg-ol-hxy-sea:
+               # grid_label=g999 placeholder (dummy fallback for unmatched
+               # ORCA1 subgrids), blocked on upstream NEMO W-point
+               # registration. Not fixable by a registry patch.
+wo             # Oday.wo + Omon.wo + Omon.woSouth30 -> wo_tavg-ol-hxy-sea:
+               # same g999 placeholder, same NEMO W-point blocker as wmo.
 
 expfe          # Emon.expfe -> expfe_tavg-d100m-hxy-sea: not in pinned CMOR tables
 fgo2           # Omon.fgo2 -> fgo2_tavg-u-hxy-sea: not in pinned CMOR tables
