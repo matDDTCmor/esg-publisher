@@ -246,12 +246,12 @@ class ESGSTACConverter:
                 v = dataset_doc.get(k, "")
             else:
                 print(f"WARNING {k} not found in dataset")
-            if k == "master_id":
-                nk = "base_id"
             if k in STAC_item_properties:
                 nk = k
             elif k in collection_item_properties:
                 nk = f"{namespace}:{k}"
+            if k == "master_id":
+                nk = "base_id"
             if isinstance(v, list):
 
                 if k in STAC_list_properties["ALL"]:
