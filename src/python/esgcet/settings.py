@@ -352,7 +352,6 @@ STAC_item_properties = [
     "version",
     "project",
     "title",
-    "master_id",
 ]
 
 
