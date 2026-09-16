@@ -46,6 +46,17 @@ sndmassmelt    # SImon.sndmassmelt -> sndmassmelt_tavg-u-hxy-si: not in pinned C
 sndmasssnf     # SImon.sndmasssnf -> sndmasssnf_tavg-u-hxy-si: not in pinned CMOR tables
 sndmasssubl    # SImon.sndmasssubl -> sndmasssubl_tavg-u-hxy-si: not in pinned CMOR tables
 
+siarea         # SIday/SImon.siarea (nh+sh) -> siarea_tavg-u-hm-u: cmip7:variable_long_name
+               # schema check rejects "Sea-Ice Area North"/"South". That value is
+               # correct per WCRP-CMIP cmip7-cmor-tables' CMIP7_long_name_overrides.json
+               # (applied at cmorization time, confirmed present in our pinned table
+               # mirror too) -- esgvoc's CV just doesn't carry the override terms yet.
+               # Upstream gap, not fixable here; siarea has no glb variant so this
+               # excludes cleanly. sisnmass/sivol (nh/sh) share the same override file
+               # and would likely hit the same gap if/when cmorized -- not excluded
+               # here since not yet confirmed against the real pipeline.
+siextent       # SIday/SImon.siextent (nh+sh) -> siextent_tavg-u-hm-u: same gap as siarea
+
 cTotFireLut        # Emon.cTotFireLut -> cTotFireLut_tavg-u-hxy-lnd: axis
                    # 'typenat' not defined in CMIP7_coordinate.json (land-use
                    # type axis missing upstream); handoff-2026-08-13
