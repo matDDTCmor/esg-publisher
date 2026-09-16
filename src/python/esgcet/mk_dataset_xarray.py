@@ -72,8 +72,8 @@ class ESGPubXArrayHandler(ESGPubHandlerBase):
             if len(lat) > 0:
                 if isinstance(lat[0].values, (list, np.ndarray)):
                     minval, maxval = self._get_min_max_bounds(lat)
-                    record["north_degrees"] = minval
-                    record["south_degrees"] = maxval
+                    record["north_degrees"] = maxval
+                    record["south_degrees"] = minval
 
                 else:    
                     record["north_degrees"] = lat[-1].values.item()
@@ -96,8 +96,8 @@ class ESGPubXArrayHandler(ESGPubHandlerBase):
             if len(lon) > 0:
                 if isinstance(lon[0].values, (list, np.ndarray)):
                     minval, maxval = self._get_min_max_bounds(lon)   
-                    record["east_degrees"] = float(minval)
-                    record["west_degrees"] = float(maxval)
+                    record["east_degrees"] = float(maxval)
+                    record["west_degrees"] = float(minval)
                 else:
                     record["east_degrees"] = float(lon[-1].values.item())
                     record["west_degrees"] = float(lon[0].values.item())
