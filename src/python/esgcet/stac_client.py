@@ -191,6 +191,19 @@ class GlobusTransactionClient:
         return True
 
 
+def _http_error_detail(err):
+    # requests.HTTPError only carries .response.status_code in the log
+    # today -- this pulls the actual body too, so a 400/403 is diagnosable
+    # from the log alone instead of needing a manual curl replay each time
+    # (see handoff-2026-09-15-group-c-live-publish-403-then-400.md).
+    body = ""
+    try:
+        body = json.dumps(err.response.json())
+    except Exception:
+        body = (err.response.text or "")[:2000]
+    return f"Error {err.response.status_code}: {body}"
+
+
 class EGITransactionClient:
     """EGI Transaction client for publishing ESGF items."""
 
@@ -277,7 +290,7 @@ class EGITransactionClient:
                     return True
 
         except requests.exceptions.HTTPError as err:
-            self.publog.error("Failed to publish: Error %s", err.response.status_code)
+            self.publog.error("Failed to publish: %s", _http_error_detail(err))
             return False
         return True
     
@@ -319,7 +332,7 @@ class EGITransactionClient:
                     return True
 
         except requests.exceptions.HTTPError as err:
-            self.publog.error("Failed to update: Error %s", err.response.status_code)
+            self.publog.error("Failed to update: %s", _http_error_detail(err))
 
 
 def getTransactionClient(stac_config):
