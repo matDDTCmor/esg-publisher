@@ -301,6 +301,8 @@ class ESGSTACConverter:
                 # "http://host.docker.internal/file/v2.1.0/schema.json"
             ],
             "id": item_id,
+            "base_id": dataset_doc.get("master_id"),
+            "version": dataset_doc.get("version"),
             "geometry": {
                 "type": "Polygon",
                 "coordinates": [
