@@ -346,6 +346,23 @@ STAC_schema_versions = {
 #                         "CMIP6" : "v3.0.4"
                         }
 
+
+def stac_schema_override(namespace):
+    """Return a schema version forced via the environment, or "".
+
+    Reads ESGF_STAC_SCHEMA_VERSION_<NAMESPACE> (for example
+    ESGF_STAC_SCHEMA_VERSION_CMIP7=v1.2.19). Returns "" when unset.
+    Raises ValueError when set to something that is not vMAJOR.MINOR.PATCH.
+    """
+    import os
+    import re
+
+    var = "ESGF_STAC_SCHEMA_VERSION_" + str(namespace).upper()
+    value = os.environ.get(var, "").strip()
+    if value and not re.fullmatch(r"v\d+\.\d+\.\d+", value):
+        raise ValueError(f"{var}={value!r} is not of the form vMAJOR.MINOR.PATCH")
+    return value
+
 STAC_item_properties = [
     "access",
     "latest",

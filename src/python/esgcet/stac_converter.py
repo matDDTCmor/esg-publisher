@@ -8,6 +8,7 @@ from esgcet.settings import (
     STAC_list_properties,
     STAC_proj_item_properties,
     STAC_schema_versions,
+    stac_schema_override,
 )
 from esgvoc.apps.jsg import json_schema_generator as jsg
 
@@ -284,6 +285,15 @@ class ESGSTACConverter:
         # Prefer the schema version from the user's selected esgvoc database.
         # Fall back to configured versions only when esgvoc cannot provide one.
         sc_version = esgvoc_version or STAC_schema_versions.get(collection, "")
+        # Operator override (ESGF_STAC_SCHEMA_VERSION_<NAMESPACE>), used to
+        # declare an older, still-accepted schema when the newest one cannot
+        # be published. Takes precedence over esgvoc.
+        override = stac_schema_override(namespace)
+        if override:
+            self.publog.warning(
+                f"Overriding STAC schema version {sc_version or '<none>'} -> {override}"
+            )
+            sc_version = override
         if sc_version == "":
             self.publog.error(f"Collection {namespace} not configured")
             return None
@@ -342,6 +352,12 @@ class ESGSTACConverter:
             "properties": properties,
             "assets": assets,
         }
+
+        if override:
+            # Pre-v2 schemas carry no root-level base_id/version; keep the
+            # Item shape consistent with the declared schema.
+            item.pop("base_id", None)
+            item.pop("version", None)
 
         if "citation_url" in dataset_doc:
             item["links"].append(self.citation_link_d(dataset_doc["citation_url"]))
