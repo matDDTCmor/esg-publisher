@@ -18,20 +18,6 @@ fracLut        # Emon.fracLut + Eyr.fracLut -> fracLut_tpt-u-hxy-u: same
                # name is the same shape of bug fixed for Omon.so/Omon.soga
                # this session; worth checking separately, not done here.
 
-msfty          # Omon.msftyz -> msfty_tavg-ol-ht-sea + Omon.msftyrho ->
-               # msfty_tavg-rho-ht-sea: grid_label unresolved on both
-               # sources. Existing siblings split T-grid (htovgyre/htovovrt
-               # -> g102) vs V-grid (hfy/hfyint -> g104) convention; true
-               # source of truth is file_def_nemo-{opa,lim3,pisces}.xml on
-               # git.smhi.se, not currently mirrored/accessible -- deferred
-               # to its own conversation, not guessed at.
-wmo            # Omon.wmo + Omon.wmoSouth30 -> wmo_tavg-ol-hxy-sea:
-               # grid_label=g999 placeholder (dummy fallback for unmatched
-               # ORCA1 subgrids), blocked on upstream NEMO W-point
-               # registration. Not fixable by a registry patch.
-wo             # Oday.wo + Omon.wo + Omon.woSouth30 -> wo_tavg-ol-hxy-sea:
-               # same g999 placeholder, same NEMO W-point blocker as wmo.
-
 expfe          # Emon.expfe -> expfe_tavg-d100m-hxy-sea: not in pinned CMOR tables
 fgo2           # Omon.fgo2 -> fgo2_tavg-u-hxy-sea: not in pinned CMOR tables
 hcont300       # Omon.hcont300 -> hcont300_tavg-olayer300m-hxy-sea: not in pinned CMOR tables
